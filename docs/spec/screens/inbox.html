@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>The inbox · Understory</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="state.js" defer></script>
+  <script src="inbox.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <a class="brand" href="../../index.md">Understory</a>
+    <nav aria-label="Workspace"><a href="inbox.html" aria-current="page">Inbox</a><a href="campaign.html">Autumn launch</a><a href="../index.md">Specification</a><a href="../../index.md">Documentation</a></nav>
+  </header>
+  <main class="screen" id="content">
+    <div class="screen-header"><div><h1>Task inbox</h1><p class="lede">Standalone HTML example: native controls, task filtering, and browser-local state. Create and triage tasks that have not been assigned to a campaign.</p></div></div>
+    <noscript>Enable JavaScript to use this interactive prototype.</noscript>
+    <p class="storage-warning" id="storage-warning" role="status"></p>
+    <div class="screen-grid">
+      <section aria-label="Inbox tasks">
+        <form id="capture" class="toolbar"><div class="field"><label for="new-task">New task</label><input id="new-task" type="text" maxlength="160" required placeholder="Task title" autocomplete="off"></div><button class="primary" type="submit">+ Add task</button></form>
+        <div class="toolbar"><div class="field"><label for="search">Find a task</label><input id="search" type="search" placeholder="Search the inbox…"></div><div class="field"><label for="filter">Show</label><select id="filter"><option value="all">All tasks</option><option value="open">Open tasks</option><option value="done">Completed tasks</option></select></div></div>
+        <div class="selection-bar"><label><input type="checkbox" id="select-all"> <span id="selection-count">Select all</span></label><button id="complete-selected" disabled>Complete selected</button><button id="move-selected" disabled>Move to autumn ↗</button></div>
+        <div class="task-list" id="tasks"></div>
+        <p class="status-line" id="feedback" role="status" aria-live="polite"></p>
+      </section>
+      <aside class="side-note"><h2>Inbox summary</h2><div class="figure" id="open-count">—</div><div class="eyebrow">Open tasks</div><hr><h2>Campaign assignment</h2><p>Selected tasks can be assigned to Autumn launch. Assigned tasks no longer appear in the inbox.</p><a href="campaign.html">Open Autumn launch</a></aside>
+    </div>
+    <footer><span>Mock data · Browser-local storage</span><button id="reset">Reset demo</button></footer>
+  </main>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "name": "fieldnotes-workbench",
+  "private": true,
+  "type": "module",
+  "bin": { "workbench": "server.js" },
+  "scripts": { "start": "node server.js", "test": "node --test server.test.js", "test:browser": "node tests/browser.mjs" },
+  "engines": { "node": ">=22" },
+  "dependencies": { "chokidar": "^4.0.3", "diff": "^8.0.2", "highlight.js": "^11.11.1", "markdown-it": "^14.1.0" },
+  "devDependencies": { "playwright-core": "^1.58.2" }
+}

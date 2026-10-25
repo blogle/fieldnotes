@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="640" viewBox="0 0 1000 640" role="img" aria-labelledby="title desc">
+  <title id="title">Documentation rendering and live-reload pipeline</title>
+  <desc id="desc">A browser requests a file from the Node server. Markdown is rendered and wrapped, while HTML receives a reload script and assets are returned directly. Separately, edits under docs flow through Chokidar and an SSE broadcast to EventSource, which reloads the browser and repeats the request.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0 0 8 4 0 8" fill="none" stroke="#ccbb7b"/>
+    </marker>
+  </defs>
+  <rect width="1000" height="640" rx="4" fill="#25211c"/>
+  <g font-family="monospace" font-size="13" fill="#ccbb7b" letter-spacing="1">
+    <text x="35" y="38">REQUEST / RENDER</text>
+    <text x="35" y="395">EDIT / RELOAD</text>
+  </g>
+  <g fill="#2d2821" stroke="#514635">
+    <rect x="35" y="65" width="230" height="85" rx="3"/>
+    <rect x="350" y="65" width="280" height="85" rx="3"/>
+    <rect x="720" y="65" width="245" height="85" rx="3"/>
+    <rect x="35" y="225" width="285" height="90" rx="3"/>
+    <rect x="355" y="225" width="285" height="90" rx="3"/>
+    <rect x="675" y="225" width="290" height="90" rx="3"/>
+    <rect x="35" y="425" width="230" height="85" rx="3"/>
+    <rect x="350" y="425" width="280" height="85" rx="3"/>
+    <rect x="720" y="425" width="245" height="85" rx="3"/>
+    <rect x="350" y="550" width="280" height="60" rx="3"/>
+  </g>
+  <g font-family="sans-serif" font-size="21" fill="#eee2c6">
+    <text x="55" y="98">Browser</text>
+    <text x="370" y="98">Node HTTP server</text>
+    <text x="740" y="98">docs/ source files</text>
+    <text x="55" y="258">Markdown</text>
+    <text x="375" y="258">Standalone HTML</text>
+    <text x="695" y="258">CSS / JS / SVG</text>
+    <text x="55" y="458">Source edit</text>
+    <text x="370" y="458">Chokidar</text>
+    <text x="740" y="458">SSE broadcast</text>
+    <text x="370" y="586">EventSource → reload()</text>
+  </g>
+  <g font-family="sans-serif" font-size="14" fill="#bcb6aa">
+    <text x="55" y="127">GET /index.md</text>
+    <text x="370" y="127">Resolve path and read source</text>
+    <text x="740" y="127">Editable, uncompiled files</text>
+    <text x="55" y="286">Parse + highlight + shared shell</text>
+    <text x="375" y="286">Inject reload script into response</text>
+    <text x="695" y="286">Return original bytes</text>
+    <text x="55" y="487">Any file under docs/</text>
+    <text x="370" y="487">Write stabilization + debounce</text>
+    <text x="740" y="487">GET /__events</text>
+    <text x="35" y="580">Reload repeats the request.</text>
+  </g>
+  <g fill="none" stroke="#ccbb7b" stroke-width="1.5" marker-end="url(#arrow)">
+    <path d="M265 108H345"/>
+    <path d="M630 108H715"/>
+    <path d="M490 150V185H178V220"/>
+    <path d="M490 185H498V220"/>
+    <path d="M490 185H820V220"/>
+    <path d="M265 468H345"/>
+    <path d="M630 468H715"/>
+    <path d="M843 510V580H635"/>
+  </g>
+  <path d="M35 350H965" stroke="#494034"/>
+</svg>

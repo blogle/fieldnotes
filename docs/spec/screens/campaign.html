@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Autumn launch · Understory</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="state.js" defer></script>
+  <script src="campaign.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead"><a class="brand" href="../../index.md">Understory</a><nav aria-label="Workspace"><a href="inbox.html">Inbox</a><a href="campaign.html" aria-current="page">Autumn launch</a><a href="../index.md">Specification</a><a href="../../index.md">Documentation</a></nav></header>
+  <main class="screen" id="content">
+    <div class="screen-header"><div><h1>Autumn launch</h1><p class="lede">Standalone HTML example: shared mock state, completion progress, and lifecycle controls.</p></div><span class="tag" id="campaign-status">ACTIVE CAMPAIGN</span></div>
+    <noscript>Enable JavaScript to use this interactive prototype.</noscript>
+    <p class="storage-warning" id="storage-warning" role="status"></p>
+    <div class="screen-grid">
+      <section aria-label="Campaign work">
+        <div class="metric"><strong id="fraction">—</strong> <span>tasks complete</span><progress id="progress" class="progress" max="100" value="0" aria-label="Campaign completion"></progress><div class="quiet" id="progress-description"></div></div>
+        <div class="section-label"><h2>Tasks</h2></div>
+        <div id="tasks"></div>
+        <form id="capture" class="toolbar"><div class="field"><label for="new-task">Add to this campaign</label><input id="new-task" type="text" maxlength="160" required placeholder="Task title" autocomplete="off"></div><button id="add-task" class="primary" type="submit">+ Add task</button></form>
+        <p class="status-line" id="feedback" role="status" aria-live="polite"></p>
+      </section>
+      <aside class="side-note"><h2>Campaign details</h2><p><strong>Identifier:</strong> <code>autumn</code></p><p><strong>Scope:</strong> onboarding, release preparation, and accessibility verification.</p><hr><h2>Status controls</h2><div class="campaign-actions"><button id="pause">Pause campaign</button><button id="close" class="primary">Close campaign</button></div><p class="quiet" id="close-hint">Complete every task before closing.</p><a href="inbox.html">Return to inbox</a></aside>
+    </div>
+    <footer><span>Mock data · Browser-local storage</span><button id="reset">Reset demo</button></footer>
+  </main>
+</body>
+</html>

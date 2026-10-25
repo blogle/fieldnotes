@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Documentation distribution approaches</title>
+  <link rel="stylesheet" href="../../assets/fieldnotes.css">
+  <style>
+    main{max-width:1440px;margin:auto;padding:45px 4vw}.options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}.option{border:1px solid var(--line);padding:24px}.option:has(input:checked){border-color:var(--accent);background:var(--surface)}.option h2{margin-top:15px;font-size:1.4rem}label{display:block;cursor:pointer}input{accent-color:var(--accent)}textarea{display:block;width:100%;min-height:110px;background:var(--surface);color:var(--bright);border:1px solid var(--line);padding:15px;font:inherit}button{padding:10px 18px;margin:15px 10px 0 0;background:var(--surface);border:1px solid var(--accent);color:var(--bright);font:inherit;cursor:pointer}#decision{white-space:pre-wrap}#feedback{color:var(--accent)}@media(max-width:850px){.options{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <header class="masthead"><a class="brand" href="../../index.md">Documentation workbench</a><nav><a href="../index.md">Specification</a><a href="inbox.html">Inbox example</a><a href="campaign.html">Campaign example</a></nav></header>
+  <main id="content">
+    <h1>Documentation distribution approaches</h1>
+    <p>Architecture comparison example. Select an approach, record project-specific constraints, and copy a decision for an agent to implement. Use Review to annotate a trade-off directly.</p>
+    <div class="options">
+      <section class="option" data-review-id="specification"><label><input type="radio" name="approach" value="specification"> A / Rebuild from a specification</label><h2>Per-project implementation</h2><p>Give an agent a behavior specification and ask it to implement the viewer in each repository.</p><h3>Benefits</h3><ul><li>Any runtime or custom server integration.</li><li>No dependency on a shared viewer release.</li></ul><h3>Costs</h3><ul><li>Fixes and browser checks repeat in every project.</li><li>Behavior and design can drift.</li></ul></section>
+      <section class="option" data-review-id="skill"><label><input type="radio" name="approach" value="skill"> B / Agent skill and local tool</label><h2>Shared authoring workflow</h2><p>A skill carries conventions and setup instructions. Each repository still owns its viewer implementation.</p><h3>Benefits</h3><ul><li>Consistent editing guidance for agents.</li><li>Flexible project-specific adaptation.</li></ul><h3>Costs</h3><ul><li>Instructions do not distribute tested executable behavior.</li><li>Local dependencies and fixes remain duplicated.</li></ul></section>
+      <section class="option" data-review-id="package"><label><input type="radio" name="approach" value="package" checked> C / Nix package with companion skill</label><h2>Shared viewer, local content</h2><p>Pin one viewer through a flake input. Store documents and small navigation/style configuration in the consuming repository.</p><h3>Benefits</h3><ul><li>Dependencies stay in the Nix store.</li><li>Shared fixes and deliberate, pinned upgrades.</li></ul><h3>Costs</h3><ul><li>Server extensions require a shared change or a fork.</li><li>Consumer environments need Nix.</li></ul></section>
+    </div>
+    <h2>Project constraints</h2><label for="rationale">Rationale and exceptions</label><textarea id="rationale" placeholder="Record constraints that affect this project's choice."></textarea>
+    <button id="copy-decision">Copy decision</button><button id="copy-prompt">Copy as prompt</button><p id="feedback" role="status" aria-live="polite"></p><pre id="decision" tabindex="0"></pre>
+  </main>
+  <script>
+    (() => {
+      const labels = { specification:'A: Rebuild from a specification', skill:'B: Agent skill and local tool', package:'C: Nix package with companion skill' };
+      function decision(prompt) {
+        const choice = document.querySelector('input[name=approach]:checked').value;
+        const rationale = document.getElementById('rationale').value.trim() || 'No additional constraints recorded.';
+        return (prompt ? 'Implement the following documentation distribution decision. Inspect the project first, preserve its conventions, and verify the result.\n\n' : '# Documentation distribution decision\n\n') + 'Selected: ' + labels[choice] + '\nRationale: ' + rationale;
+      }
+      async function copy(prompt) {
+        const text = decision(prompt); document.getElementById('decision').textContent = text;
+        try { await navigator.clipboard.writeText(text); document.getElementById('feedback').textContent = 'Copied.'; }
+        catch { document.getElementById('feedback').textContent = 'Select and copy the decision below.'; }
+      }
+      document.getElementById('copy-decision').onclick = () => copy(false);
+      document.getElementById('copy-prompt').onclick = () => copy(true);
+    })();
+  </script>
+</body>
+</html>

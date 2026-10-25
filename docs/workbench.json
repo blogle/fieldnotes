@@ -1,0 +1,14 @@
+{
+  "title": "Fieldnotes",
+  "entry": "index.md",
+  "navigation": [
+    { "label": "Overview", "href": "index.md" },
+    { "label": "Architecture", "href": "architecture.md" },
+    { "label": "Pipeline", "href": "pipeline.md" },
+    { "label": "Reuse", "href": "reuse.md" },
+    { "label": "Review", "href": "review.md" },
+    { "label": "Specification", "href": "spec/index.md" },
+    { "label": "Evaluation", "href": "research.md" },
+    { "label": "Examples", "href": "spec/screens/approaches.html" }
+  ]
+}

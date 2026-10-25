@@ -1,0 +1,5 @@
+{
+  "type": "feature",
+  "semver": "minor",
+  "summary": "Introduce Fieldnotes: a reusable Nix-packaged Markdown/HTML viewer with offline downloads, anchored annotation prompts, and in-page Git comparison."
+}
