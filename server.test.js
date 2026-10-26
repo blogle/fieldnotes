@@ -57,7 +57,7 @@ test('documentation viewer integration', async t => {
   });
   await t.test('live changes include Markdown, HTML, CSS and new directories', async () => {
     const controller = new AbortController();
-    const response = await fetch(base + '/__events', { signal: controller.signal });
+    const response = await fetch(base + '/__fieldnotes/events', { signal: controller.signal });
     const reader = response.body.getReader();
     await reader.read();
     const directory = new URL('./docs/__integration/', import.meta.url);
@@ -88,12 +88,12 @@ test('documentation viewer integration', async t => {
 });
 
 test('external consumer configuration and read-only Git comparison', async t => {
-  const directory = await mkdtemp(path.join(tmpdir(), 'workbench-test-'));
+  const directory = await mkdtemp(path.join(tmpdir(), 'fieldnotes-test-'));
   t.after(() => rm(directory, { recursive:true, force:true }));
   const docs = path.join(directory,'docs'); await mkdir(docs);
   const filename = path.join(docs,'index.md');
   await writeFile(filename, '# Consumer\n\n## Original\n\nBefore text.\n');
-  await writeFile(path.join(docs,'workbench.json'), JSON.stringify({title:'Consumer project',navigation:[{label:'Home',href:'index.md'}]}));
+  await writeFile(path.join(docs,'fieldnotes.json'), JSON.stringify({title:'Consumer project',navigation:[{label:'Home',href:'index.md'}]}));
   const execute = promisify(execFile);
   const git = args => execute('git',['-C',directory,...args], { env: { ...process.env, GIT_AUTHOR_NAME:'Test', GIT_AUTHOR_EMAIL:'test@example.invalid', GIT_COMMITTER_NAME:'Test', GIT_COMMITTER_EMAIL:'test@example.invalid' } });
   const child = spawn(process.execPath,[fileURLToPath(new URL('./server.js', import.meta.url)), '--root', docs, '--project', directory, '--port','0']);
@@ -103,38 +103,38 @@ test('external consumer configuration and read-only Git comparison', async t => 
     child.on('error',reject); child.once('exit', code => reject(new Error(`Server exited ${code}`)));
   });
   assert.match(await (await fetch(base+'/index.md')).text(), /Consumer project/);
-  assert.equal((await fetch(base+'/__workbench/assets/fieldnotes.css')).status,200);
-  const noGit = await (await fetch(base+'/__workbench/api/compare?path=index.md')).json();
+  assert.equal((await fetch(base+'/__fieldnotes/assets/fieldnotes.css')).status,200);
+  const noGit = await (await fetch(base+'/__fieldnotes/api/compare?path=index.md')).json();
   assert.equal(noGit.available,false);
   await git(['init','--quiet']); await git(['add','docs']); await git(['commit','--quiet','-m','Fixture baseline']);
   await writeFile(filename, '# Consumer\n\n## Updated\n\nAfter text.\n');
-  const comparison = await (await fetch(base+'/__workbench/api/compare?path=index.md')).json();
+  const comparison = await (await fetch(base+'/__fieldnotes/api/compare?path=index.md')).json();
   assert.equal(comparison.changed,true); assert.match(comparison.diff, /-Before text/); assert.match(comparison.diff, /\+After text/);
   assert.match(comparison.beforeHtml, /Original/); assert.match(comparison.afterHtml, /Updated/);
   assert.doesNotMatch(comparison.beforeHtml, /review.js/);
-  assert.equal(await (await fetch(base+'/__workbench/head/index.md')).text(), '# Consumer\n\n## Original\n\nBefore text.\n');
+  assert.equal(await (await fetch(base+'/__fieldnotes/head/index.md')).text(), '# Consumer\n\n## Original\n\nBefore text.\n');
   await writeFile(path.join(docs,'new.html'), '<h1>New</h1>');
-  const added = await (await fetch(base+'/__workbench/api/compare?path=new.html')).json();
+  const added = await (await fetch(base+'/__fieldnotes/api/compare?path=new.html')).json();
   assert.equal(added.untracked,true);
-  assert.equal((await fetch(base+'/__workbench/api/compare?path=../outside.md')).status,403);
+  assert.equal((await fetch(base+'/__fieldnotes/api/compare?path=../outside.md')).status,403);
   await symlink(path.join(directory,'outside.md'), path.join(docs,'escape.md'));
   await writeFile(path.join(directory,'outside.md'),'outside');
   assert.equal((await fetch(base+'/escape.md')).status,403);
-  await writeFile(path.join(docs,'workbench.json'), JSON.stringify({title:'Changed configuration',navigation:[]}));
+  await writeFile(path.join(docs,'fieldnotes.json'), JSON.stringify({title:'Changed configuration',navigation:[]}));
   assert.match(await (await fetch(base+'/index.md')).text(), /Changed configuration/);
   await writeFile(path.join(docs,'guide.md'),'# Guide');
   await writeFile(path.join(docs,'project.css'), ':root{--accent:#ccbb7b}');
   await writeFile(path.join(docs,'project.js'),'window.customDocumentation=true;');
-  await writeFile(path.join(docs,'workbench.json'), JSON.stringify({title:'Custom',entry:'guide.md',navigation:[{label:'Guide',href:'guide.md'}],styles:['project.css'],scripts:['project.js']}));
+  await writeFile(path.join(docs,'fieldnotes.json'), JSON.stringify({title:'Custom',entry:'guide.md',navigation:[{label:'Guide',href:'guide.md'}],styles:['project.css'],scripts:['project.js']}));
   const custom = await (await fetch(base+'/guide.md')).text();
   assert.match(custom, /href="\/project.css"/); assert.match(custom, /src="\/project.js"/);
   assert.equal((await fetch(base+'/',{redirect:'manual'})).headers.get('location'),'/guide.md');
-  await writeFile(path.join(docs,'workbench.json'),'null');
+  await writeFile(path.join(docs,'fieldnotes.json'),'null');
   assert.equal((await fetch(base+'/index.md')).status,400);
-  await writeFile(path.join(docs,'workbench.json'),'{}');
+  await writeFile(path.join(docs,'fieldnotes.json'),'{}');
   const status = (await git(['status','--porcelain'])).stdout;
   assert.match(status,/docs\/index.md/); // Comparison did not change the index or commit source edits.
   assert.equal((await git(['diff','--cached','--name-only'])).stdout,'');
-  assert.equal((await fetch(base+'/__workbench/compare?path=index.md')).status,200);
+  assert.equal((await fetch(base+'/__fieldnotes/compare?path=index.md')).status,200);
   child.kill('SIGTERM'); await once(child,'exit');
 });

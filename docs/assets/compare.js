@@ -4,7 +4,7 @@ export async function mountComparison(root, page, { close } = {}) {
   $('close-diff').onclick = close || (() => location.assign('/' + page));
   $('close-diff').focus();
   try {
-    const response = await fetch('/__workbench/api/compare?path=' + encodeURIComponent(page));
+    const response = await fetch('/__fieldnotes/api/compare?path=' + encodeURIComponent(page));
     if (!response.ok) throw new Error(await response.text());
     const result = await response.json();
     if (!root.isConnected) return;
@@ -19,12 +19,12 @@ export async function mountComparison(root, page, { close } = {}) {
       const parsed = new DOMParser().parseFromString(source,'text/html');
       parsed.querySelectorAll('script,base,meta[http-equiv="refresh"]').forEach(e => e.remove());
       const base = document.createElement('base');
-      base.href = new URL((before ? '/__workbench/head/' : '/') + page, location.origin).href;
+      base.href = new URL((before ? '/__fieldnotes/head/' : '/') + page, location.origin).href;
       parsed.head.prepend(base);
       if (before) parsed.querySelectorAll('[src],[href]').forEach(element => {
         for (const attribute of ['src','href']) {
           const value = element.getAttribute(attribute);
-          if (value?.startsWith('/') && !value.startsWith('/__workbench/')) element.setAttribute(attribute,'/__workbench/head' + value);
+          if (value?.startsWith('/') && !value.startsWith('/__fieldnotes/')) element.setAttribute(attribute,'/__fieldnotes/head' + value);
         }
       });
       if (result.markdown) {
@@ -40,7 +40,7 @@ export async function mountComparison(root, page, { close } = {}) {
 }
 
 const standalone = document.querySelector('main.comparison');
-if (standalone && location.pathname === '/__workbench/compare') {
+if (standalone && location.pathname === '/__fieldnotes/compare') {
   const page = new URL(location.href).searchParams.get('path');
   if (page && !page.startsWith('/') && !page.split('/').includes('..')) mountComparison(standalone,page);
   else standalone.textContent = 'A valid content-relative page path is required.';

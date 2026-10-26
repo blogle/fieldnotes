@@ -50,7 +50,7 @@ export async function exportPage() {
   const clonedStyles = [...clone.querySelectorAll('link[rel="stylesheet"],style')];
   for (let i = 0; i < originalStyles.length; i++) {
     const original = originalStyles[i], destination = clonedStyles[i];
-    if (original.hasAttribute('data-workbench-ui')) { destination.remove(); continue; }
+    if (original.hasAttribute('data-fieldnotes-ui')) { destination.remove(); continue; }
     if (!original.sheet) throw new Error('A stylesheet has not loaded yet');
     const style = document.createElement('style');
     style.textContent = await stylesheet(original.sheet);
@@ -91,10 +91,10 @@ export async function exportPage() {
   });
   // Explicit application hook: examples can supply a JSON bootstrap, not a storage dump.
   const detail = { document: clone, bootstrap: [] };
-  window.dispatchEvent(new CustomEvent('workbench:export', { detail }));
+  window.dispatchEvent(new CustomEvent('fieldnotes:export', { detail }));
   const scripts = [...clone.querySelectorAll('script')];
   for (const script of scripts) {
-    if (script.hasAttribute('data-workbench-ui')) { script.remove(); continue; }
+    if (script.hasAttribute('data-fieldnotes-ui')) { script.remove(); continue; }
     if (script.type === 'module') throw new Error('ES modules must be made standalone before export');
     if (script.src) {
       script.textContent = await fetchResource(script.getAttribute('src'));
@@ -104,20 +104,20 @@ export async function exportPage() {
     script.removeAttribute('defer'); script.removeAttribute('async');
     script.remove();
   }
-  clone.querySelectorAll('[data-workbench-ui],meta[name="workbench-page"],base,link[rel="preload"],link[rel="modulepreload"]').forEach(e => e.remove());
-  clone.querySelectorAll('[data-workbench-original-inert]').forEach(e => {
-    e.inert = e.dataset.workbenchOriginalInert === 'true'; delete e.dataset.workbenchOriginalInert;
+  clone.querySelectorAll('[data-fieldnotes-ui],meta[name="fieldnotes-page"],base,link[rel="preload"],link[rel="modulepreload"]').forEach(e => e.remove());
+  clone.querySelectorAll('[data-fieldnotes-original-inert]').forEach(e => {
+    e.inert = e.dataset.fieldnotesOriginalInert === 'true'; delete e.dataset.fieldnotesOriginalInert;
   });
-  if (document.querySelector('script[src="/__workbench/assets/document.js"],script[src="/assets/document.js"]')) clone.querySelector('.toc nav')?.replaceChildren();
+  if (document.querySelector('script[src="/__fieldnotes/assets/document.js"]')) clone.querySelector('.toc nav')?.replaceChildren();
   // Outgoing page links keep an absolute destination; a download is one page, not a site.
   for (const a of clone.querySelectorAll('a[href]')) {
     const href = a.getAttribute('href');
     if (href && !href.startsWith('#')) a.setAttribute('href', new URL(href, location.href).href);
   }
   for (const source of detail.bootstrap) { const script = document.createElement('script'); script.textContent = source.replace(/<\/script/gi,'<\\/script'); clone.querySelector('body').append(script); }
-  for (const script of scripts) if (!script.hasAttribute('data-workbench-ui')) clone.querySelector('body').append(script);
+  for (const script of scripts) if (!script.hasAttribute('data-fieldnotes-ui')) clone.querySelector('body').append(script);
   const html = '<!doctype html>\n' + clone.outerHTML;
   const blob = new Blob([html], { type:'text/html;charset=utf-8' });
-  const page = document.querySelector('meta[name="workbench-page"]')?.content || location.pathname;
+  const page = document.querySelector('meta[name="fieldnotes-page"]')?.content || location.pathname;
   return { blob, filename: page.split('/').pop().replace(/\.[^.]+$/, '') + '.html' };
 }

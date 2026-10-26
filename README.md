@@ -2,7 +2,7 @@
 
 A build-free Markdown/HTML documentation workbench. Its documents describe the workbench itself: repository structure, rendering, live reload, authoring rules, and verification. Shared typography uses a three-column grid: content spans the left two columns and a heading-derived TOC occupies the right column. At 850px and below, the TOC stacks above the content. Two task screens and an architecture-options comparison serve as standalone HTML examples.
 
-Repository: [blogle/fieldnotes](https://github.com/blogle/fieldnotes). The Nix package also exposes a `fieldnotes` command; `workbench` remains a compatible alias.
+Repository: [blogle/fieldnotes](https://github.com/blogle/fieldnotes). The Nix package exposes the `fieldnotes` command.
 
 ## Run
 
@@ -24,11 +24,11 @@ Or use the packaged app with **no local npm installation**:
 nix run . -- --root docs --project .
 ```
 
-To serve another repository, use `nix run /path/to/this/workbench -- --root /path/to/project/docs --project /path/to/project`. The package includes Node, Git, viewer assets, and npm dependencies in the Nix store. `nix build .` builds the same app. A consumer can pin this flake as an input and expose its package as `apps.<system>.docs`; see `docs/reuse.md` for the integration fragment.
+To serve another repository, use `nix run /path/to/fieldnotes -- --root /path/to/project/docs --project /path/to/project`. The package includes Node, Git, viewer assets, and npm dependencies in the Nix store. `nix build .` builds the same app. A consumer can pin this flake as an input and expose its package as `apps.<system>.docs`; see `docs/reuse.md` for the integration fragment.
 
 ## Configuration and page tools
 
-`docs/workbench.json` controls site title, entry, ordered navigation, and optional project CSS/classic scripts. The CLI supports `--root`, `--project`, `--config`, `--host`, and `--port`. Content/config edits reload without restarting; source-code edits require restart.
+`docs/fieldnotes.json` controls site title, entry, ordered navigation, and optional project CSS/classic scripts. The CLI supports `--root`, `--project`, `--config`, `--host`, and `--port`. Content/config edits reload without restarting; source-code edits require restart.
 
 Every served Markdown/HTML page has three compact icon controls:
 
@@ -36,7 +36,7 @@ Every served Markdown/HTML page has three compact icon controls:
 - **Comment icon:** open the right-side annotation drawer. Select text or pick an element, save browser-local comments, and copy a prompt containing source path, quotes, heading/context, locator, and feedback. Annotations appear as list items; stale targets remain available and are flagged.
 - **Diff icon:** toggle the current page into a read-only side-by-side HEAD/working-tree view without changing its URL. Close restores the original page, scroll position, and drafts. The unified source diff is expandable, and preview scripts/forms are disabled. No Git writes; no-Git/untracked states are explicit.
 
-`skills/documentation-workbench/SKILL.md` encodes the agent workflow. Register its containing directory with your agent's skill loader or copy it to a supported skill location. OpenCode registration changes require a restart. Server customization uses project styles/scripts and standalone HTML; arbitrary backend plugins are intentionally outside the configuration contract.
+`skills/fieldnotes/SKILL.md` encodes the agent workflow. The pinned SDLC input re-exports `sdlc.lib.skills`; the flake exposes `apps.<system>.skills-install-local` for explicit project-local installation. Run `nix run .#skills-install-local` from the repository root; it installs the selected SDLC and Fieldnotes skills under `.agents/skills/`. Server customization uses project styles/scripts and standalone HTML; arbitrary backend plugins are intentionally outside the configuration contract.
 
 The server renders Markdown on request and serves other assets directly. Chokidar watches the whole `docs/` tree, including newly created directories. An injected Server-Sent Events client refreshes all connected pages after a save; a single HTTP port handles everything. No compilation, generated site, external assets, or CDN requests.
 
