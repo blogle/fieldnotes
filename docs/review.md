@@ -21,7 +21,7 @@ The exporter rejects external assets, ES modules, embedded documents (`iframe`, 
 Serializing a DOM does not serialize JavaScript closures or event listeners. Classic scripts run again when the exported page opens. Applications can provide an explicit bootstrap through this synchronous hook:
 
 ```javascript
-window.addEventListener('workbench:export', event => {
+window.addEventListener('fieldnotes:export', event => {
   // event.detail.document is the cloned HTML element, not the live document.
   event.detail.bootstrap.push(
     `window.exampleSnapshot = ${JSON.stringify(currentState)};`

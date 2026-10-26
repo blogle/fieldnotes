@@ -44,7 +44,7 @@
     <text x="695" y="286">Return original bytes</text>
     <text x="55" y="487">Any file under docs/</text>
     <text x="370" y="487">Write stabilization + debounce</text>
-    <text x="740" y="487">GET /__events</text>
+    <text x="740" y="487">GET /__fieldnotes/events</text>
     <text x="35" y="580">Reload repeats the request.</text>
   </g>
   <g fill="none" stroke="#ccbb7b" stroke-width="1.5" marker-end="url(#arrow)">

@@ -1,0 +1,5 @@
+{
+  "type": "feature",
+  "semver": "minor",
+  "summary": "Align Fieldnotes names and add declarative SDLC-backed skill installation"
+}

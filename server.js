@@ -14,14 +14,14 @@ const { values } = parseArgs({ options: {
   host: { type: 'string' }, port: { type: 'string' }, help: { type: 'boolean' }
 } });
 if (values.help) {
-  console.log('workbench [--root docs] [--project .] [--config docs/workbench.json] [--host 127.0.0.1] [--port 3000]');
+  console.log('fieldnotes [--root docs] [--project .] [--config docs/fieldnotes.json] [--host 127.0.0.1] [--port 3000]');
   process.exit(0);
 }
 const root = await realpath(path.resolve(values.root || 'docs'));
 const project = await realpath(path.resolve(values.project || path.dirname(root)));
 const inside = (base, filename) => filename === base || filename.startsWith(base + path.sep);
 if (!inside(project, root)) throw new Error('Content root must be inside the project root');
-const configPath = path.resolve(values.config || path.join(root, 'workbench.json'));
+const configPath = path.resolve(values.config || path.join(root, 'fieldnotes.json'));
 await readConfig(configPath); // Fail early with an actionable configuration error.
 const builtins = await realpath(fileURLToPath(new URL('./docs/assets/', import.meta.url)));
 const clients = new Set();
@@ -42,17 +42,17 @@ const server = http.createServer(async (req, res) => {
     if (req.method !== 'GET' && req.method !== 'HEAD') { send(res, 'text/plain', 'Read-only server', 405); return; }
     const url = new URL(req.url, 'http://localhost');
     const pathname = decodeURIComponent(url.pathname);
-    if (pathname === '/__events') {
+    if (pathname === '/__fieldnotes/events') {
       res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', Connection: 'keep-alive' });
       res.write(': connected\n\n'); clients.add(res);
       req.on('close', () => clients.delete(res)); return;
     }
     const config = await readConfig(configPath);
     if (pathname === '/') { res.writeHead(302, { Location: '/' + config.entry }).end(); return; }
-    if (pathname === '/__workbench/context') {
+    if (pathname === '/__fieldnotes/context') {
       send(res, 'application/json', JSON.stringify({ project, root })); return;
     }
-    if (pathname === '/__workbench/api/compare') {
+    if (pathname === '/__fieldnotes/api/compare') {
       const relative = url.searchParams.get('path');
       if (!relative || relative.startsWith('/')) throw new Error('A content-relative page path is required');
       const filename = await confined(root, relative);
@@ -67,20 +67,20 @@ const server = http.createServer(async (req, res) => {
       }
       send(res, 'application/json', JSON.stringify(result)); return;
     }
-    if (pathname === '/__workbench/compare') {
+    if (pathname === '/__fieldnotes/compare') {
       send(res, 'text/html', `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Compare with HEAD</title><link rel="stylesheet" href="${asset('fieldnotes.css')}"><link rel="stylesheet" href="${asset('compare.css')}"><script type="module" src="${asset('compare.js')}"></script></head><body><main class="comparison"></main></body></html>`); return;
     }
-    if (pathname.startsWith('/__workbench/head/')) {
-      const filename = await confined(root, pathname.slice('/__workbench/head/'.length), { missing: true });
+    if (pathname.startsWith('/__fieldnotes/head/')) {
+      const filename = await confined(root, pathname.slice('/__fieldnotes/head/'.length), { missing: true });
       const result = await baseline(project, filename, { binary: true });
       if (!result.available || result.untracked) { send(res, 'text/plain', 'No HEAD version', 404); return; }
       send(res, types[path.extname(filename)] || 'application/octet-stream', result.before); return;
     }
-    if (pathname.startsWith('/__workbench/assets/')) {
-      const filename = await confined(builtins, pathname.slice('/__workbench/assets/'.length));
+    if (pathname.startsWith('/__fieldnotes/assets/')) {
+      const filename = await confined(builtins, pathname.slice('/__fieldnotes/assets/'.length));
       send(res, types[path.extname(filename)] || 'application/octet-stream', await readFile(filename)); return;
     }
-    if (pathname.startsWith('/__workbench/')) { send(res, 'text/plain', 'Unknown viewer endpoint', 404); return; }
+    if (pathname.startsWith('/__fieldnotes/')) { send(res, 'text/plain', 'Unknown viewer endpoint', 404); return; }
     let filename = await confined(root, '.' + pathname);
     if ((await stat(filename)).isDirectory()) filename = await confined(root, path.relative(root, path.join(filename, 'index.md')));
     const page = path.relative(root, filename).split(path.sep).join('/');
@@ -99,7 +99,7 @@ const watcher = watch([root, configPath], { ignoreInitial: true, awaitWriteFinis
 watcher.on('all', () => { clearTimeout(timer); timer = setTimeout(() => clients.forEach(res => res.write('data: reload\n\n')), 80); });
 const heartbeat = setInterval(() => clients.forEach(res => res.write(': heartbeat\n\n')), 20000);
 server.listen(Number(values.port || process.env.PORT || 3000), values.host || process.env.HOST || '127.0.0.1', () => {
-  console.log(`Workbench → http://${values.host || process.env.HOST || '127.0.0.1'}:${server.address().port}/`);
+  console.log(`Fieldnotes → http://${values.host || process.env.HOST || '127.0.0.1'}:${server.address().port}/`);
 });
 for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, async () => {
   clearInterval(heartbeat); clearTimeout(timer); clients.forEach(res => res.end()); await watcher.close(); server.close();

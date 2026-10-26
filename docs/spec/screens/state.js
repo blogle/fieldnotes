@@ -1,6 +1,6 @@
 /* Plain script so file:// screens work without a module server. */
 (() => {
-  const key = 'understory-demo-v1';
+  const key = 'fieldnotes-demo-v1';
   const seed = () => ({ version: 1, campaignStatus: 'active', tasks: [
     { id: 'i1', title: 'Ask the studio about their weekly review', status: 'open', campaign: null, priority: 'normal' },
     { id: 'i2', title: 'Specify the inbox empty state', status: 'open', campaign: null, priority: 'high' },
@@ -24,15 +24,15 @@
         && ['normal','high'].includes(t.priority));
   }
   try {
-    const raw = window.__WORKBENCH_EXAMPLE_STATE__ ? null : localStorage.getItem(key);
-    state = window.__WORKBENCH_EXAMPLE_STATE__ || (raw ? JSON.parse(raw) : seed());
+    const raw = window.__FIELDNOTES_EXAMPLE_STATE__ ? null : localStorage.getItem(key);
+    state = window.__FIELDNOTES_EXAMPLE_STATE__ || (raw ? JSON.parse(raw) : seed());
     if (!valid(state)) throw new Error('Invalid snapshot');
   } catch {
     state = seed();
     warn('Saved state could not be read. Using the sample tasks; changes may not persist.');
   }
   function save() {
-    if (window.__WORKBENCH_EXAMPLE_STATE__) return; // Exported examples remain isolated in memory.
+    if (window.__FIELDNOTES_EXAMPLE_STATE__) return; // Exported examples remain isolated in memory.
     try { localStorage.setItem(key, JSON.stringify(state)); }
     catch { warn('Storage is unavailable. Changes last only while this page is open.'); }
   }
@@ -76,7 +76,7 @@
     } catch { /* Keep current state if another tab writes an invalid snapshot. */ }
   });
   window.demo = { get state() { return state; }, save, add, row, announce };
-  window.addEventListener('workbench:export', event => {
-    event.detail.bootstrap.push(`window.__WORKBENCH_EXAMPLE_STATE__ = ${JSON.stringify(state)};`);
+  window.addEventListener('fieldnotes:export', event => {
+    event.detail.bootstrap.push(`window.__FIELDNOTES_EXAMPLE_STATE__ = ${JSON.stringify(state)};`);
   });
 })();

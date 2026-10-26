@@ -35,7 +35,7 @@ in {
       actionlint .github/workflows/*.yml
     '';
     contracts = test "fieldnotes-contracts" [ sdlc.packages.${system}.sdlc ] ''
-      node --input-type=module -e 'import {readConfig} from "./lib/config.js"; await readConfig("docs/workbench.json")'
+      node --input-type=module -e 'import {readConfig} from "./lib/config.js"; await readConfig("docs/fieldnotes.json")'
       sdlc install --check
       sdlc changelog check
     '';
@@ -49,7 +49,7 @@ in {
     '';
     publisher = test "fieldnotes-publisher" [ ] ''python3 -m unittest discover -s tests -p 'test_publish.py' -v'';
     package = pkgs.runCommand "fieldnotes-package" { nativeBuildInputs = [ pkgs.nodejs_22 ]; } ''
-      export WORKBENCH=${viewer}/bin/fieldnotes
+      export FIELDNOTES=${viewer}/bin/fieldnotes
       node ${./tests/package.mjs}
       touch $out
     '';
