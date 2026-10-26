@@ -32,7 +32,7 @@ Link it from `docs/index.md` with `[Editing documents](guide.md)`. The page rece
 
 - Include a document title, viewport metadata, semantic structure, and labelled native controls.
 - Supply navigation and relative CSS/JS references in the source file.
-- Reuse the shared theme through a local relative stylesheet or the served `/__workbench/assets/fieldnotes.css`; put example-specific layout rules beside the example. Share can embed either into an offline artifact.
+- Reuse the shared theme through a local relative stylesheet or the served `/__fieldnotes/assets/fieldnotes.css`; put example-specific layout rules beside the example. Share can embed either into an offline artifact.
 - Use plain scripts that work through both HTTP and `file://`.
 - Do not add reload/review clients to the source. The server injects them into served HTML.
 
@@ -50,7 +50,7 @@ The [inbox](screens/inbox.html) and [campaign](screens/campaign.html) demonstrat
 | SVG image reference | Browser-rendered image served from source |
 | Level-two/three heading | Client-derived TOC entry and fragment link |
 
-The Markdown shell renders ordered links from `workbench.json`. New pages become reachable through authored links without registration; add a global link in the config when appropriate. Site title, entry page, and project CSS/classic scripts are also configured there. See [reuse and configuration](../reuse.md).
+The Markdown shell renders ordered links from `fieldnotes.json`. New pages become reachable through authored links without registration; add a global link in the config when appropriate. Site title, entry page, and project CSS/classic scripts are also configured there. See [reuse and configuration](../reuse.md).
 
 ## Layout and navigation
 

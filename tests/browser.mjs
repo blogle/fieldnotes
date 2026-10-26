@@ -11,7 +11,7 @@ import assert from 'node:assert/strict';
 if (!process.env.CHROMIUM) throw new Error('Set CHROMIUM to the absolute path of an installed Chromium executable.');
 const execute = promisify(execFile);
 const repository = fileURLToPath(new URL('../', import.meta.url));
-const fixture = await mkdtemp(path.join(tmpdir(),'workbench-browser-'));
+const fixture = await mkdtemp(path.join(tmpdir(),'fieldnotes-browser-'));
 async function start(root, project) {
   const child = spawn(process.execPath,[path.join(repository,'server.js'),'--root',root,'--project',project,'--port','0']);
   const base = await new Promise((resolve,reject) => {
@@ -58,13 +58,13 @@ try {
     const pending = page.waitForEvent('download'), popup = page.waitForEvent('popup'); await tool('Download page').click();
     const download = await pending, filename = path.join(fixture,name); await download.saveAs(filename);
     const preview = await popup; await preview.waitForURL('blob:**');
-    assert.equal(await preview.locator('[data-workbench-ui]').count(),0); await preview.close();
+    assert.equal(await preview.locator('[data-fieldnotes-ui]').count(),0); await preview.close();
     assert.equal(await page.locator('#review-drawer').isVisible(),false);
     return filename;
   }
   const documentExport = await downloadPage('/index.md','document.html');
   const html = await readFile(documentExport,'utf8');
-  assert.doesNotMatch(html,/data-workbench-ui|workbench-review-v1|new EventSource|<script[^>]+src=/);
+  assert.doesNotMatch(html,/data-fieldnotes-ui|fieldnotes-review-v1|new EventSource|<script[^>]+src=/);
   assert.match(html,/<style>/);
   const diagramExport = await downloadPage('/pipeline.md','diagram.html');
   assert.match(await readFile(diagramExport,'utf8'),/data:image\/svg\+xml/);
@@ -112,7 +112,7 @@ try {
     }
     await tool('Review annotations').click();
     assert.ok(await page.evaluate(() => {
-      const panel = document.querySelector('div[data-workbench-ui]').shadowRoot.querySelector('.panel').getBoundingClientRect();
+      const panel = document.querySelector('div[data-fieldnotes-ui]').shadowRoot.querySelector('.panel').getBoundingClientRect();
       return panel.left>=0 && panel.right<=innerWidth;
     }));
     await tool('Pick element').click(); assert.equal(await page.locator('#review-drawer').isVisible(),false);

@@ -1,20 +1,40 @@
 (async () => {
   if (window.top !== window) return;
-  const page = document.querySelector('meta[name="workbench-page"]')?.content;
+  const page = document.querySelector('meta[name="fieldnotes-page"]')?.content;
   if (!page) return;
   const content = document.body;
   const host = document.createElement('div');
-  host.dataset.workbenchUi = '';
+  host.dataset.fieldnotesUi = '';
   const ui = host.attachShadow({ mode: 'open' });
   const icon = paths => `<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
-  ui.innerHTML = `<link rel="stylesheet" href="/__workbench/assets/review.css"><div class="bar" role="group" aria-label="Page tools"><button id="share" class="icon" aria-label="Download page" title="Download self-contained HTML">${icon('<path d="M12 3v12m-4-4 4 4 4-4M4 16v5h16v-5"/>')}</button><button id="review" class="icon" aria-label="Review annotations" title="Review annotations" aria-expanded="false" aria-controls="review-drawer">${icon('<path d="M21 4H3v13h5v4l5-4h8z"/>')}<span id="count" aria-hidden="true" hidden></span></button><button id="compare" class="icon" aria-label="Toggle page diff" title="Compare page with HEAD" aria-pressed="false">${icon('<path d="M9 3H4v18h5m6-18h5v18h-5M12 4v16M6 8h2m-2 8h2m8-8h2m-1-1v2m-1 7h2"/>')}</button></div><p class="toast" id="download-status" role="status" aria-live="polite" hidden></p><section id="review-drawer" class="panel" hidden aria-label="Review annotations"><header class="drawer-header"><h2>Annotations</h2><button class="close" id="hide" aria-label="Close review panel">×</button></header><p>Select text to annotate, or pick a page element.</p><div class="actions"><button id="annotate">Annotate selection</button><button id="pick" aria-pressed="false">Pick element</button></div><p class="quote" id="target">No target selected.</p><form id="comment-form" hidden><label for="comment">Feedback</label><textarea id="comment" required maxlength="10000"></textarea><div class="actions"><button type="submit">Save comment</button><button type="button" id="cancel">Cancel</button></div></form><p class="status" id="status" role="status" aria-live="polite"></p><ol id="notes" aria-label="Saved annotations"></ol><div class="drawer-footer"><div class="actions"><button id="copy">Copy prompt</button><button id="clear">Clear page draft</button></div><label id="prompt-label" hidden for="prompt">Prompt (select and copy if clipboard is unavailable)</label><textarea id="prompt" hidden readonly></textarea></div></section>`;
+  ui.innerHTML = `
+    <link rel="stylesheet" href="/__fieldnotes/assets/review.css">
+    <div class="bar" role="group" aria-label="Page tools">
+      <button id="share" class="icon" aria-label="Download page" title="Download self-contained HTML">${icon('<path d="M12 3v12m-4-4 4 4 4-4M4 16v5h16v-5"/>')}</button>
+      <button id="review" class="icon" aria-label="Review annotations" title="Review annotations" aria-expanded="false" aria-controls="review-drawer">${icon('<path d="M21 4H3v13h5v4l5-4h8z"/>')}<span id="count" aria-hidden="true" hidden></span></button>
+      <button id="compare" class="icon" aria-label="Toggle page diff" title="Compare page with HEAD" aria-pressed="false">${icon('<path d="M9 3H4v18h5m6-18h5v18h-5M12 4v16M6 8h2m-2 8h2m8-8h2m-1-1v2m-1 7h2"/>')}</button>
+    </div>
+    <p class="toast" id="download-status" role="status" aria-live="polite" hidden></p>
+    <section id="review-drawer" class="panel" hidden aria-label="Review annotations">
+      <header class="drawer-header"><h2>Annotations</h2><button class="close" id="hide" aria-label="Close review panel">×</button></header>
+      <p>Select text to annotate, or pick a page element.</p>
+      <div class="actions"><button id="annotate">Annotate selection</button><button id="pick" aria-pressed="false">Pick element</button></div>
+      <p class="quote" id="target">No target selected.</p>
+      <form id="comment-form" hidden><label for="comment">Feedback</label><textarea id="comment" required maxlength="10000"></textarea><div class="actions"><button type="submit">Save comment</button><button type="button" id="cancel">Cancel</button></div></form>
+      <p class="status" id="status" role="status" aria-live="polite"></p>
+      <ol id="notes" aria-label="Saved annotations"></ol>
+      <div class="drawer-footer">
+        <div class="actions"><button id="copy">Copy prompt</button><button id="clear">Clear page draft</button></div>
+        <label id="prompt-label" hidden for="prompt">Prompt (select and copy if clipboard is unavailable)</label><textarea id="prompt" hidden readonly></textarea>
+      </div>
+    </section>`;
   document.body.append(host);
   const $ = id => ui.getElementById(id);
   const pickHint = document.createElement('p'); pickHint.className = 'toast'; pickHint.hidden = true; pickHint.setAttribute('role','status');
   pickHint.textContent = 'Pick a page element. Press Escape to cancel.'; ui.append(pickHint);
   let context = {};
-  try { context = await (await fetch('/__workbench/context')).json(); } catch { /* Origin/page still provides a local fallback. */ }
-  const key = `workbench-review-v1:${context.root || location.origin}:${page}`;
+  try { context = await (await fetch('/__fieldnotes/context')).json(); } catch { /* Origin/page still provides a local fallback. */ }
+  const key = `fieldnotes-review-v1:${context.root || location.origin}:${page}`;
   let notes = [], target, editing, selection, picking = false, closeDiff;
   let storageError = '';
   try {
@@ -29,7 +49,7 @@
   }
   function textNodes() {
     const nodes = [], walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, {
-      acceptNode(node) { return node.parentElement.closest('script,style,noscript,[data-workbench-ui]') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT; }
+      acceptNode(node) { return node.parentElement.closest('script,style,noscript,[data-fieldnotes-ui]') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT; }
     });
     while (walker.nextNode()) nodes.push(walker.currentNode);
     return nodes;
@@ -174,16 +194,16 @@
     if (closeDiff) { closeDiff(); return; }
     $('compare').disabled = true;
     try {
-      const { mountComparison } = await import('/__workbench/assets/compare.js');
+      const { mountComparison } = await import('/__fieldnotes/assets/compare.js');
       const scroll = { x:scrollX, y:scrollY };
       const original = [...document.body.children].filter(e => e !== host && !e.matches('script,style'));
-      original.forEach(e => { e.dataset.workbenchOriginalInert = String(e.inert); e.inert = true; });
+      original.forEach(e => { e.dataset.fieldnotesOriginalInert = String(e.inert); e.inert = true; });
       const view = document.createElement('section'); view.className = 'comparison'; view.setAttribute('aria-label','Page diff');
-      const style = document.createElement('link'); style.rel = 'stylesheet'; style.href = '/__workbench/assets/compare.css'; ui.append(style,view);
-      const lock = document.createElement('style'); lock.dataset.workbenchUi = ''; lock.textContent = 'html{overflow:hidden}'; document.head.append(lock);
+      const style = document.createElement('link'); style.rel = 'stylesheet'; style.href = '/__fieldnotes/assets/compare.css'; ui.append(style,view);
+      const lock = document.createElement('style'); lock.dataset.fieldnotesUi = ''; lock.textContent = 'html{overflow:hidden}'; document.head.append(lock);
       closeDiff = () => {
         view.remove(); style.remove(); lock.remove();
-        original.forEach(e => { e.inert = e.dataset.workbenchOriginalInert === 'true'; delete e.dataset.workbenchOriginalInert; });
+        original.forEach(e => { e.inert = e.dataset.fieldnotesOriginalInert === 'true'; delete e.dataset.fieldnotesOriginalInert; });
         closeDiff = null; $('compare').setAttribute('aria-pressed','false'); $('annotate').disabled = false; $('pick').disabled = false;
         scrollTo(scroll.x,scroll.y); positionMarkers(); $('compare').focus();
       };
@@ -209,7 +229,7 @@
     if (preview) { preview.opener = null; preview.document.title = 'Preparing Fieldnotes download'; preview.document.body.textContent = 'Preparing self-contained HTML…'; }
     $('share').disabled = true; $('share').setAttribute('aria-busy','true'); toast('Preparing download…');
     try {
-      const { exportPage } = await import('/__workbench/assets/share.js');
+      const { exportPage } = await import('/__fieldnotes/assets/share.js');
       const { blob, filename } = await exportPage();
       const url = URL.createObjectURL(blob), link = document.createElement('a'); link.href = url; link.download = filename; link.click();
       if (preview && !preview.closed) preview.location.replace(url);

@@ -7,6 +7,44 @@
   outputs = { self, nixpkgs, sdlc, ... }:
     let
       systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
+      agentSkills = sdlc.lib.skills;
+      skillsIntegration = system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+          sources = {
+            sdlc = { path = sdlc; subdir = "skills"; };
+            fieldnotes = { path = self; subdir = "skills"; };
+          };
+          catalog = agentSkills.discoverCatalog sources;
+          allowlist = agentSkills.allowlistFor {
+            inherit catalog sources;
+            enable = [ "sdlc" "fieldnotes" ];
+          };
+          selection = agentSkills.selectSkills {
+            inherit catalog sources allowlist;
+            skills = { };
+          };
+          bundle = agentSkills.mkBundle { inherit pkgs selection; };
+          targets = {
+            agents = agentSkills.defaultLocalTargets.agents // { enable = true; };
+          };
+          install = agentSkills.mkLocalInstallProgram { inherit pkgs bundle targets; };
+        in {
+          apps.skills-install-local = {
+            type = "app";
+            program = "${install}/bin/skills-install-local";
+          };
+          checks.skills-install = pkgs.runCommand "fieldnotes-skills-install" { nativeBuildInputs = [ install ]; } ''
+            mkdir -p work
+            cd work
+            ${install}/bin/skills-install-local
+            test -f .agents/skills/fieldnotes/SKILL.md
+            test -f .agents/skills/sdlc/SKILL.md
+            ${install}/bin/skills-install-local
+            test -f .agents/skills/.agent-skills-managed.json
+            touch $out
+          '';
+        };
     in
     {
       packages = nixpkgs.lib.genAttrs systems (system:
@@ -21,34 +59,36 @@
                 && !(builtins.elem (baseNameOf path) [ "node_modules" "result" "test-results" "__pycache__" ]);
             };
             nodejs = pkgs.nodejs_22;
-            npmDepsHash = "sha256-eUJpG+mvYaeBKmcnwVKr7MY0yEL+C6mbJR8Slbk4ruY=";
+            npmDepsHash = "sha256-xZJ/B173+ikBPLXTl2av314l8FzbavaPIC5PFCzOFT0=";
             dontNpmBuild = true;
             npmFlags = [ "--omit=dev" ];
             nativeBuildInputs = [ pkgs.makeWrapper ];
             installPhase = ''
               runHook preInstall
-              mkdir -p $out/lib/workbench/docs $out/bin $out/share/workbench
-              cp server.js package.json $out/lib/workbench/
-              cp -r lib node_modules $out/lib/workbench/
-              cp -r docs/assets $out/lib/workbench/docs/
-              cp -r skills $out/share/workbench/
-              makeWrapper ${pkgs.nodejs_22}/bin/node $out/bin/workbench \
-                --add-flags "$out/lib/workbench/server.js" \
+              mkdir -p $out/lib/fieldnotes/docs $out/bin $out/share/fieldnotes
+              cp server.js package.json $out/lib/fieldnotes/
+              cp -r lib node_modules $out/lib/fieldnotes/
+              cp -r docs/assets $out/lib/fieldnotes/docs/
+              cp -r skills $out/share/fieldnotes/
+              makeWrapper ${pkgs.nodejs_22}/bin/node $out/bin/fieldnotes \
+                --add-flags "$out/lib/fieldnotes/server.js" \
                 --prefix PATH : ${pkgs.lib.makeBinPath [ pkgs.git ]}
-              ln -s workbench $out/bin/fieldnotes
               runHook postInstall
             '';
-            meta.mainProgram = "workbench";
+            meta.mainProgram = "fieldnotes";
           };
-        in { default = viewer; workbench = viewer; fieldnotes = viewer; }
+        in { default = viewer; fieldnotes = viewer; }
           // nixpkgs.lib.optionalAttrs (sdlc.packages ? ${system}) { sdlc = sdlc.packages.${system}.sdlc; });
 
       ci = nixpkgs.lib.genAttrs [ "x86_64-linux" ] (system:
         sdlc.lib.mkConsumer (import ./ci.nix { inherit self system sdlc; pkgs = nixpkgs.legacyPackages.${system}; }));
 
-      apps = nixpkgs.lib.genAttrs systems (system: {
-        default = { type = "app"; program = "${self.packages.${system}.default}/bin/workbench"; };
-      });
+      apps = nixpkgs.lib.genAttrs systems (system:
+        {
+          default = { type = "app"; program = "${self.packages.${system}.default}/bin/fieldnotes"; };
+        } // (skillsIntegration system).apps);
+
+      checks = nixpkgs.lib.genAttrs [ "x86_64-linux" ] (system: (skillsIntegration system).checks);
 
       devShells = nixpkgs.lib.genAttrs systems (system:
         let

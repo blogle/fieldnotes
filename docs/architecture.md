@@ -17,7 +17,7 @@ lib/git.js                Read-only HEAD retrieval and source comparison
 server.test.js            Node integration checks
 skills/                   Companion agent authoring/review skill
 docs/                     Served content and watched source tree
-├── workbench.json        This project's navigation and title
+├── fieldnotes.json       This project's navigation and title
 ├── index.md              Viewer entry point
 ├── architecture.md       This document
 ├── pipeline.md           Rendering and change propagation
@@ -35,7 +35,7 @@ docs/                     Served content and watched source tree
     └── screens/          Standalone interactive HTML examples
 ```
 
-The server resolves `--root` relative to the current working directory, defaulting to `docs/`. Built-in viewer assets resolve relative to the installed server and are served under `/__workbench/assets/`, even when the content lives in another repository. The configured entry defaults to `/index.md`, not `/docs/index.md`.
+The server resolves `--root` relative to the current working directory, defaulting to `docs/`. Built-in viewer assets resolve relative to the installed server and are served under `/__fieldnotes/assets/`, even when the content lives in another repository. The configured entry defaults to `/index.md`, not `/docs/index.md`.
 
 ## Runtime components
 
@@ -66,7 +66,7 @@ An unrecognized or omitted language falls back to Markdown-it’s escaped code o
 
 ## Presentation ownership
 
-Markdown documents receive the shared HTML shell from `lib/render.js`. The shell includes configured header navigation, the prose region, TOC container, stylesheet, and browser scripts. Authors do not repeat this structure. `workbench.json` controls title, entry, ordered links, and optional local styles/scripts; it is read for each request.
+Markdown documents receive the shared HTML shell from `lib/render.js`. The shell includes configured header navigation, the prose region, TOC container, stylesheet, and browser scripts. Authors do not repeat this structure. `fieldnotes.json` controls title, entry, ordered links, and optional local styles/scripts; it is read for each request.
 
 The document grid has three equal tracks. Prose spans the first two and the TOC occupies the third. At 850 CSS pixels and below, the TOC moves above the prose. The desktop TOC is sticky and scrolls internally if its contents exceed the available viewport height.
 
@@ -76,11 +76,11 @@ Standalone HTML bypasses the Markdown shell. Each example provides its own navig
 
 The server keeps connected SSE responses and a debounce timer in memory. Source files remain the persistent representation of the documentation. Browser-local review drafts record feedback by page path; they are never written into project files. See [draft storage](review.md#draft-storage-and-copied-prompts).
 
-The task examples independently use `localStorage` under `understory-demo-v1`. `state.js` supplies seed data, snapshot validation, save operations, and cross-tab updates. Their search and selection state is transient. This example storage is unrelated to document rendering or live reload.
+The task examples independently use `localStorage` under `fieldnotes-demo-v1`. `state.js` supplies seed data, snapshot validation, save operations, and cross-tab updates. Their search and selection state is transient. This example storage is unrelated to document rendering or live reload.
 
 ## Request boundary
 
-Content requests are confined to the resolved content root, with a second real-path check to reject symlink escapes. The project root must contain the content root. Missing files return 404; rejected escapes return 403; other caught errors return 400. Viewer endpoints live under `/__workbench/`; no directory browser or source editor is exposed. Requests other than GET/HEAD are rejected.
+Content requests are confined to the resolved content root, with a second real-path check to reject symlink escapes. The project root must contain the content root. Missing files return 404; rejected escapes return 403; other caught errors return 400. Viewer endpoints live under `/__fieldnotes/`; no directory browser or source editor is exposed. Requests other than GET/HEAD are rejected.
 
 All ordinary document and asset responses use `Cache-Control: no-store`. The server reads the requested file again on each request and does not cache rendered HTML.
 

@@ -9,12 +9,12 @@ The viewer has two related paths: an HTTP request turns a source file into a res
 | Request | Behavior |
 | --- | --- |
 | `/` | Redirect to `/index.md` with HTTP 302 |
-| `/__events` | Open an SSE stream for reload notifications |
-| `/__workbench/assets/…` | Serve installed viewer assets independently of the project's content |
-| `/__workbench/compare?path=…` | Open the read-only comparison UI |
-| `/__workbench/api/compare?path=…` | Return current source, HEAD source, rendered previews, and a unified diff |
-| `/__workbench/head/…` | Read a content-root-relative asset from HEAD for the baseline preview |
-| `/__workbench/context` | Return local project/content paths for a copied review prompt |
+| `/__fieldnotes/events` | Open an SSE stream for reload notifications |
+| `/__fieldnotes/assets/…` | Serve installed viewer assets independently of the project's content |
+| `/__fieldnotes/compare?path=…` | Open the read-only comparison UI |
+| `/__fieldnotes/api/compare?path=…` | Return current source, HEAD source, rendered previews, and a unified diff |
+| `/__fieldnotes/head/…` | Read a content-root-relative asset from HEAD for the baseline preview |
+| `/__fieldnotes/context` | Return local project/content paths for a copied review prompt |
 | A directory, such as `/spec/` | Read that directory’s `index.md` |
 | A `.md` file | Render Markdown and wrap it in the shared document shell |
 | A `.html` file | Read HTML and inject the reload script |
@@ -76,7 +76,7 @@ data: reload
 
 ```
 
-5. `reload.js` receives the message through `EventSource('/__events')` and calls `location.reload()`.
+5. `reload.js` receives the message through `EventSource('/__fieldnotes/events')` and calls `location.reload()`.
 6. The browser requests the current document and its assets again.
 
 The timings reduce partial-write and multi-event refreshes; they are not a guaranteed end-to-end latency. Events are global, not filtered by the page’s dependencies. Editing a CSS or SVG file reloads Markdown pages and HTML examples alike.
